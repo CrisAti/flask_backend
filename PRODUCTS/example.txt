@@ -1,0 +1,4 @@
+curl -X POST http://localhost:5001/products   -H "Content-Type: application/json" -d '{
+    "name": "Mouse",
+    "description": "Mouse xd"
+}'

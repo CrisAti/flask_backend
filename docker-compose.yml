@@ -1,0 +1,49 @@
+
+services:
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: productos
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+
+  db2:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: usuarios
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data2:/var/lib/postgresql/data
+    restart: always
+
+  users:
+    build: ./USERS
+    ports:
+      - "5000:5000"
+    environment:
+      DATABASE_URL: postgresql://admin:admin123@db2:5432/usuarios
+    depends_on:
+      - db2
+    restart: always
+
+  productos:
+    build: ./PRODUCTS
+    ports:
+      - "5001:5001"
+    environment:
+      DATABASE_URL: postgresql://admin:admin123@db:5432/productos
+    depends_on:
+      - db
+    restart: always
+
+volumes:
+  postgres_data:
+  postgres_data2:

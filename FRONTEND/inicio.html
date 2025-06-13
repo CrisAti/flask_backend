@@ -2,29 +2,42 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Página de Inicio</title>
+  <title>Productos</title>
   <style>
     body {
       background-color: #121212;
       color: #ffffff;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
       flex-direction: column;
-      text-align: center;
+      align-items: center;
+      padding: 40px;
     }
 
     h1 {
-      font-size: 36px;
-      margin-bottom: 20px;
+      font-size: 32px;
       color: #4fef7b;
+      margin-bottom: 20px;
     }
 
-    p {
-      font-size: 18px;
-      color: #cccccc;
+    table {
+      border-collapse: collapse;
+      width: 80%;
+      margin-top: 20px;
+    }
+
+    th, td {
+      border: 1px solid #444;
+      padding: 12px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #222;
+    }
+
+    tr:nth-child(even) {
+      background-color: #1a1a1a;
     }
 
     .btn-logout {
@@ -36,7 +49,6 @@
       color: white;
       font-size: 15px;
       cursor: pointer;
-      transition: background-color 0.3s;
     }
 
     .btn-logout:hover {
@@ -45,15 +57,53 @@
   </style>
 </head>
 <body>
-  <h1>¡Bienvenido!</h1>
-  <p>Has iniciado sesión correctamente.</p>
+  <h1>Lista de Productos</h1>
+  <table id="productosTable">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Descripción</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Productos serán insertados aquí -->
+    </tbody>
+  </table>
+
   <button class="btn-logout" onclick="logout()">Cerrar Sesión</button>
 
   <script>
     function logout() {
-      // Opcional: limpiar localStorage o cookies si se usan
-      window.location.href = 'index.html';
+      window.location.href = 'login.html';
     }
+
+    function cargarProductos() {
+      fetch('http://localhost:5001/products') // ✅ ruta corregida
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          const tbody = document.getElementById('productosTable').querySelector('tbody');
+          data.forEach(p => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${p.id}</td>
+              <td>${p.name}</td>
+              <td>${p.description}</td>
+            `;
+            tbody.appendChild(row);
+          });
+        })
+        .catch(error => {
+          console.error('Error al cargar productos:', error);
+        });
+    }
+
+    cargarProductos();
   </script>
 </body>
 </html>

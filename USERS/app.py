@@ -12,7 +12,7 @@ with app.app_context():
 @app.route('/users', methods=['POST'])
 def create_user():
     data = request.get_json()
-    new_user = User(username=data['username'], email=data['email'])
+    new_user = User(username=data['username'], email=data['email'],password=data['password'])
     db.session.add(new_user)
     db.session.commit()
     return jsonify({'message': 'User created successfully'}), 201
@@ -33,6 +33,7 @@ def update_user(id):
     user = User.query.get_or_404(id)
     user.username = data['username']
     user.email = data['email']
+    user.password = data['password']
     db.session.commit()
     return jsonify({'message': 'User updated successfully'})
 

@@ -17,7 +17,8 @@ def create_product():
     data = request.get_json()
     new_product = Product(
         name=data['name'],
-        description=data['description']
+        description=data['description'],
+        price=data.get('price', 0.0)  # ✅ por defecto 0.0 si no se envía
     )
     db.session.add(new_product)
     db.session.commit()
@@ -28,7 +29,12 @@ def create_product():
 def get_products():
     products = Product.query.all()
     return jsonify([
-        {'id': p.id, 'name': p.name, 'description': p.description}
+        {
+            'id': p.id,
+            'name': p.name,
+            'description': p.description,
+            'price': p.price  # ✅ incluido
+        }
         for p in products
     ])
 
@@ -39,7 +45,8 @@ def get_product(id):
     return jsonify({
         'id': product.id,
         'name': product.name,
-        'description': product.description
+        'description': product.description,
+        'price': product.price  # ✅ incluido
     })
 
 # Actualizar producto
@@ -49,6 +56,7 @@ def update_product(id):
     product = Product.query.get_or_404(id)
     product.name = data['name']
     product.description = data['description']
+    product.price = data.get('price', product.price)  # ✅ mantiene precio si no se envía
     db.session.commit()
     return jsonify({'message': 'Product updated successfully'})
 

@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <title>Login</title>
   <style>
-    /* Todo tu estilo igual que antes */
     * {
       margin: 0;
       padding: 0;
@@ -138,10 +137,17 @@
       .then(response => response.json().then(data => ({ status: response.status, body: data })))
       .then(result => {
         if (result.status === 200) {
-          messageDiv.innerHTML = `<div class="success">Bienvenido, ${result.body.user.username}</div>`;
-          console.log("Login success:", result.body);
-          // Aquí puedes redirigir o guardar datos del usuario
-          window.location.href = 'inicio.html';
+          const user = result.body.user;
+          messageDiv.innerHTML = `<div class="success">Bienvenido, ${user.username}</div>`;
+          console.log("Login success:", user);
+
+          // ✅ Redirección según el rol
+          if (user.rol === 'admin') {
+            window.location.href = 'admin.html';
+          } else {
+            window.location.href = 'inicio.html';
+          }
+
         } else {
           messageDiv.innerHTML = `<div class="error">${result.body.message}</div>`;
         }

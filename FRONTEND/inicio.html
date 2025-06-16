@@ -64,6 +64,7 @@
         <th>ID</th>
         <th>Nombre</th>
         <th>Descripción</th>
+        <th>Precio</th> <!-- Nueva columna -->
       </tr>
     </thead>
     <tbody>
@@ -75,11 +76,11 @@
 
   <script>
     function logout() {
-      window.location.href = 'login.html';
+      window.location.href = 'index.html';
     }
 
     function cargarProductos() {
-      fetch('http://localhost:5001/products') // ✅ ruta corregida
+      fetch('http://localhost:5001/products')
         .then(response => {
           if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
@@ -94,6 +95,7 @@
               <td>${p.id}</td>
               <td>${p.name}</td>
               <td>${p.description}</td>
+              <td>$${p.price.toFixed(2)}</td>
             `;
             tbody.appendChild(row);
           });

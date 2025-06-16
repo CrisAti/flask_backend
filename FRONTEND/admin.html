@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Panel Admin</title>
+  <style>
+    body {
+      background-color: #101010;
+      color: #fff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 40px;
+    }
+
+    h1 {
+      color: #00ffa8;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    section {
+      margin-bottom: 60px;
+    }
+
+    h2 {
+      color: #4fef7b;
+      margin-bottom: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th, td {
+      padding: 10px;
+      border: 1px solid #444;
+      text-align: center;
+    }
+
+    th {
+      background-color: #222;
+    }
+
+    tr:nth-child(even) {
+      background-color: #1a1a1a;
+    }
+
+    input {
+      padding: 6px;
+      margin: 5px;
+      border-radius: 6px;
+      border: 1px solid #444;
+      background: #2c2c2c;
+      color: #fff;
+    }
+
+    button {
+      padding: 6px 12px;
+      background-color: #4fef7b;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin: 5px;
+    }
+
+    button:hover {
+      background-color: #3bd77f;
+    }
+
+    .delete-btn {
+      background-color: #ff5c5c;
+    }
+
+    .delete-btn:hover {
+      background-color: #e44c4c;
+    }
+
+    .form-inline {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .logout-btn {
+      background-color: #888;
+      margin-bottom: 30px;
+    }
+
+    .logout-btn:hover {
+      background-color: #aaa;
+    }
+  </style>
+</head>
+<body>
+
+  <button class="logout-btn" onclick="cerrarSesion()">Cerrar Sesión</button>
+
+  <h1>Panel de Administración</h1>
+
+  <!-- USUARIOS -->
+  <section>
+    <h2>Usuarios</h2>
+    <div class="form-inline">
+      <input type="number" id="u-id" placeholder="ID (para actualizar)">
+      <input type="text" id="u-username" placeholder="Username">
+      <input type="email" id="u-email" placeholder="Email">
+      <input type="password" id="u-password" placeholder="Contraseña">
+      <input type="text" id="u-rol" placeholder="Rol (admin/user)">
+      <button onclick="crearUsuario()">Crear</button>
+      <button onclick="actualizarUsuario()">Actualizar</button>
+      <button onclick="obtenerUsuario()">Obtener por ID</button>
+    </div>
+
+    <table id="tablaUsuarios">
+      <thead>
+        <tr>
+          <th>ID</th><th>Username</th><th>Email</th><th>Rol</th><th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <!-- PRODUCTOS -->
+  <section>
+    <h2>Productos</h2>
+    <div class="form-inline">
+      <input type="number" id="p-id" placeholder="ID (para actualizar)">
+      <input type="text" id="p-nombre" placeholder="Nombre">
+      <input type="text" id="p-descripcion" placeholder="Descripción">
+      <input type="number" id="p-precio" placeholder="Precio">
+      <button onclick="crearProducto()">Crear</button>
+      <button onclick="actualizarProducto()">Actualizar</button>
+      <button onclick="obtenerProducto()">Obtener por ID</button>
+    </div>
+
+    <table id="tablaProductos">
+      <thead>
+        <tr>
+          <th>ID</th><th>Nombre</th><th>Descripción</th><th>Precio</th><th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <script>
+    const USERS_API = 'http://localhost:5000/users';
+    const PRODUCTS_API = 'http://localhost:5001/products';
+
+    function cerrarSesion() {
+      window.location.href = 'index.html';
+    }
+
+    // ---------- USUARIOS ----------
+    function cargarUsuarios() {
+      fetch(USERS_API)
+        .then(res => res.json())
+        .then(usuarios => {
+          const tbody = document.querySelector('#tablaUsuarios tbody');
+          tbody.innerHTML = '';
+          usuarios.forEach(u => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${u.id}</td>
+              <td>${u.username}</td>
+              <td>${u.email}</td>
+              <td>${u.rol}</td>
+              <td>
+                <button onclick="eliminarUsuario(${u.id})" class="delete-btn">Eliminar</button>
+              </td>
+            `;
+            tbody.appendChild(row);
+          });
+        });
+    }
+
+    function crearUsuario() {
+      const data = {
+        username: document.getElementById('u-username').value,
+        email: document.getElementById('u-email').value,
+        password: document.getElementById('u-password').value,
+        rol: document.getElementById('u-rol').value || 'user'
+      };
+
+      fetch(USERS_API, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+      }).then(() => {
+        cargarUsuarios();
+        limpiarCamposUsuario();
+      });
+    }
+
+    function actualizarUsuario() {
+      const id = document.getElementById('u-id').value;
+      const data = {
+        username: document.getElementById('u-username').value,
+        email: document.getElementById('u-email').value,
+        password: document.getElementById('u-password').value,
+        rol: document.getElementById('u-rol').value
+      };
+
+      fetch(`${USERS_API}/${id}`, {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+      }).then(() => {
+        cargarUsuarios();
+        limpiarCamposUsuario();
+      });
+    }
+
+    function obtenerUsuario() {
+      const id = document.getElementById('u-id').value;
+      fetch(`${USERS_API}/${id}`)
+        .then(res => res.json())
+        .then(u => {
+          document.getElementById('u-username').value = u.username;
+          document.getElementById('u-email').value = u.email;
+          document.getElementById('u-rol').value = u.rol;
+        });
+    }
+
+    function eliminarUsuario(id) {
+      fetch(`${USERS_API}/${id}`, { method: 'DELETE' })
+        .then(() => cargarUsuarios());
+    }
+
+    function limpiarCamposUsuario() {
+      document.getElementById('u-id').value = '';
+      document.getElementById('u-username').value = '';
+      document.getElementById('u-email').value = '';
+      document.getElementById('u-password').value = '';
+      document.getElementById('u-rol').value = '';
+    }
+
+    // ---------- PRODUCTOS ----------
+    function cargarProductos() {
+      fetch(PRODUCTS_API)
+        .then(res => res.json())
+        .then(productos => {
+          const tbody = document.querySelector('#tablaProductos tbody');
+          tbody.innerHTML = '';
+          productos.forEach(p => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${p.id}</td>
+              <td>${p.name}</td>
+              <td>${p.description}</td>
+              <td>$${p.price.toFixed(2)}</td>
+              <td>
+                <button onclick="eliminarProducto(${p.id})" class="delete-btn">Eliminar</button>
+              </td>
+            `;
+            tbody.appendChild(row);
+          });
+        });
+    }
+
+    function crearProducto() {
+      const data = {
+        name: document.getElementById('p-nombre').value,
+        description: document.getElementById('p-descripcion').value,
+        price: parseFloat(document.getElementById('p-precio').value)
+      };
+
+      fetch(PRODUCTS_API, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+      }).then(() => {
+        cargarProductos();
+        limpiarCamposProducto();
+      });
+    }
+
+    function actualizarProducto() {
+      const id = document.getElementById('p-id').value;
+      const data = {
+        name: document.getElementById('p-nombre').value,
+        description: document.getElementById('p-descripcion').value,
+        price: parseFloat(document.getElementById('p-precio').value)
+      };
+
+      fetch(`${PRODUCTS_API}/${id}`, {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+      }).then(() => {
+        cargarProductos();
+        limpiarCamposProducto();
+      });
+    }
+
+    function obtenerProducto() {
+      const id = document.getElementById('p-id').value;
+      fetch(`${PRODUCTS_API}/${id}`)
+        .then(res => res.json())
+        .then(p => {
+          document.getElementById('p-nombre').value = p.name;
+          document.getElementById('p-descripcion').value = p.description;
+          document.getElementById('p-precio').value = p.price;
+        });
+    }
+
+    function eliminarProducto(id) {
+      fetch(`${PRODUCTS_API}/${id}`, { method: 'DELETE' })
+        .then(() => cargarProductos());
+    }
+
+    function limpiarCamposProducto() {
+      document.getElementById('p-id').value = '';
+      document.getElementById('p-nombre').value = '';
+      document.getElementById('p-descripcion').value = '';
+      document.getElementById('p-precio').value = '';
+    }
+
+    // Inicializar
+    cargarUsuarios();
+    cargarProductos();
+  </script>
+</body>
+</html>

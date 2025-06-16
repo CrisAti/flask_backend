@@ -24,7 +24,8 @@ def login():
         'user': {
             'id': user.id,
             'username': user.username,
-            'email': user.email
+            'email': user.email,
+            'rol': user.rol  # ✅ Incluido en la respuesta
         }
     })
 

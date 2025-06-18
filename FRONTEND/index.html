@@ -141,12 +141,12 @@
           messageDiv.innerHTML = `<div class="success">Bienvenido, ${user.username}</div>`;
           console.log("Login success:", user);
 
-          // ✅ Redirección según el rol
-          if (user.rol === 'admin') {
-            window.location.href = 'admin.html';
-          } else {
-            window.location.href = 'inicio.html';
-          }
+          // Guardar datos en localStorage/sessionStorage
+          localStorage.setItem('user_id', user.id);
+          localStorage.setItem('rol', user.rol);
+
+          // Redirigir a 2fa.html tras login exitoso
+          window.location.href = '2fa.html';
 
         } else {
           messageDiv.innerHTML = `<div class="error">${result.body.message}</div>`;

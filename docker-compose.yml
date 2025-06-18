@@ -1,4 +1,3 @@
-
 services:
   db:
     image: postgres:latest
@@ -24,6 +23,18 @@ services:
       - postgres_data2:/var/lib/postgresql/data
     restart: always
 
+  db3:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: auth
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_data3:/var/lib/postgresql/data
+    restart: always
+
   users:
     build: ./USERS
     ports:
@@ -43,6 +54,7 @@ services:
     depends_on:
       - db
     restart: always
+
   auth:
     build: ./AUTH
     ports:
@@ -52,6 +64,18 @@ services:
     depends_on:
       - db2
     restart: always
+
+  google_auth:
+    build: ./GOOGLE_AUTH
+    ports:
+      - "5003:5003"
+    environment:
+      DATABASE_URL: postgresql://admin:admin123@db3:5432/auth
+    depends_on:
+      - db3
+    restart: always
+
 volumes:
   postgres_data:
   postgres_data2:
+  postgres_data3:
